@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Excel异步导入</title>
+</head>
+<body>
+    <input type="file" id="excelFile" accept=".xlsx,.xls">
+    <button onclick="upload()">开始上传</button>
+    <div id="progress"></div>
+
+    <script>
+        let ws = null;
+        let currentTaskId = null;
+
+        function upload() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) {
+                alert('请选择一个文件');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('excel', file);
+
+            fetch('http://localhost:2345', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('网络响应错误');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.data?.taskId) {
+                    currentTaskId = data.data.taskId;
+                    connectWS(currentTaskId);
+                } else {
+                    alert('未获取到任务ID');
+                }
+            })
+            .catch(error => {
+                console.error('上传文件时出错:', error);
+                alert('上传文件时出错，请重试');
+            });
+        }
+
+        function connectWS(taskId) {
+            if (ws) ws.close();
+
+            ws = new WebSocket(`ws://localhost:2346`);
+
+            ws.onopen = () => {
+                console.log('WebSocket 连接已打开');
+                ws.send(JSON.stringify({ taskId }));
+            };
+
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                console.log('收到消息:', data);
+                updateUI(data);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket 错误:', error);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket 连接已关闭');
+            };
+        }
+
+        function updateUI(data) {
+            const progressDiv = document.getElementById('progress');
+            let html = `<h3>任务ID: ${data.taskId}</h3>`;
+
+            if (data.status === 'processing') {
+                html += `
+                    <div>进度: ${data.progress}%</div>
+                    <div>已处理: ${data.current}/${data.total} 行</div>
+                `;
+            } else if (data.status === 'completed') {
+                html += `
+                    <div style="color:green">处理完成！</div>
+                    <div>有效行数: ${data.validRows}</div>
+                    <div>错误数量: ${data.errorCount}</div>
+                `;
+            } else if (data.status === 'failed') {
+                html += `<div style="color:red">处理失败: ${data.error}</div>`;
+            }
+
+            progressDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

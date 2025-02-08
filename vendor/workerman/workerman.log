@@ -1,0 +1,127 @@
+2025-02-06 09:59:26 pid:1 Error: Call to undefined method Workerman\Connection\TcpConnection::header() in D:\php\www\upload\http_server.php:15
+Stack trace:
+#0 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): {closure}(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#1 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #22)
+#2 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#5 D:\php\www\upload\http_server.php(53): Workerman\Worker::runAll()
+#6 {main}
+2025-02-06 10:01:13 pid:1 Error: Call to undefined method Workerman\Connection\TcpConnection::header() in D:\php\www\upload\http_server.php:29
+Stack trace:
+#0 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): {closure}(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#1 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #22)
+#2 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#5 D:\php\www\upload\http_server.php(89): Workerman\Worker::runAll()
+#6 {main}
+2025-02-06 11:35:49 pid:1 Worker process terminated
+2025-02-06 11:39:19 pid:1 Worker process terminated
+2025-02-06 14:41:33 pid:1 Error: Call to undefined function pcntl_fork() in D:\php\www\upload\http_server.php:68
+Stack trace:
+#0 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): {closure}(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#1 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #22)
+#2 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#5 D:\php\www\upload\http_server.php(109): Workerman\Worker::runAll()
+#6 {main}
+2025-02-06 14:42:25 pid:1 Error: Call to undefined function pcntl_fork() in D:\php\www\upload\http_server.php:69
+Stack trace:
+#0 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): {closure}(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#1 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #22)
+#2 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#5 D:\php\www\upload\http_server.php(110): Workerman\Worker::runAll()
+#6 {main}
+2025-02-06 15:28:57 pid:1 Error: Call to undefined function pcntl_fork() in D:\php\www\upload\http_server.php:76
+Stack trace:
+#0 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): {closure}(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#1 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #22)
+#2 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#5 D:\php\www\upload\http_server.php(117): Workerman\Worker::runAll()
+#6 {main}
+2025-02-07 11:36:50 pid:1 Exception: Failed to create directory in D:\php\www\upload\src\Services\HttpServer.php:77
+Stack trace:
+#0 D:\php\www\upload\src\Services\HttpServer.php(40): Upload\Services\HttpServer->saveUploadedFile(Array, '67a57fd209eab')
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\HttpServer->onRequest(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #23)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\HttpServer.php(11): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 11:39:27 pid:1 Exception: Failed to create directory in D:\php\www\upload\src\Services\HttpServer.php:78
+Stack trace:
+#0 D:\php\www\upload\src\Services\HttpServer.php(40): Upload\Services\HttpServer->saveUploadedFile(Array, '67a5806f48c2e')
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\HttpServer->onRequest(Object(Workerman\Connection\TcpConnection), Object(Workerman\Protocols\Http\Request))
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #23)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\HttpServer.php(11): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 11:49:38 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:33
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(33): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 11:57:29 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:33
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(33): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 14:43:32 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:34
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(34): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 14:46:19 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:34
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(34): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 14:49:06 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:34
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(34): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
+2025-02-07 15:04:53 pid:1 RedisException: read error on connection to 127.0.0.1:6379 in D:\php\www\upload\src\Services\WsServer.php:34
+Stack trace:
+#0 D:\php\www\upload\src\Services\WsServer.php(34): Redis->subscribe(Array, Object(Closure))
+#1 D:\php\www\upload\vendor\workerman\workerman\Connection\TcpConnection.php(646): Upload\Services\WsServer->onWsMessage(Object(Workerman\Connection\TcpConnection), '{"taskId":"67a5...')
+#2 D:\php\www\upload\vendor\workerman\workerman\Events\Select.php(311): Workerman\Connection\TcpConnection->baseRead(Resource id #25)
+#3 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1570): Workerman\Events\Select->loop()
+#4 D:\php\www\upload\vendor\workerman\workerman\Worker.php(1487): Workerman\Worker::forkWorkersForWindows()
+#5 D:\php\www\upload\vendor\workerman\workerman\Worker.php(562): Workerman\Worker::forkWorkers()
+#6 D:\php\www\upload\WsServer.php(13): Workerman\Worker::runAll()
+#7 {main}
