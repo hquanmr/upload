@@ -6,9 +6,14 @@ define('APP_ROOT', __DIR__);
 
 use Upload\Services\QueueWorker;
 use think\facade\Db;
+use think\facade\Log;
 // 加载数据库配置
-$config = require 'src/Config/database.php';
-Db::setConfig($config);
+$logConfig = require 'src/Config/log.php';
+$dbConfig = require 'src/Config/database.php';
+
+
+Log::init($logConfig);
+Db::setConfig($dbConfig);
 
 $queue = new QueueWorker();
 

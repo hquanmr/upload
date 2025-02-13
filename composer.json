@@ -10,7 +10,10 @@
 
         "psr-4": {
             "Upload\\": "src/"
-       }  
+       } ,
+       "files": [
+        "src/functions.php"
+    ] 
     
 }
 }

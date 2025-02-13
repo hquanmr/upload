@@ -28,9 +28,10 @@ class WsServer extends Worker
         if (!isset($message['taskId'])) return;
 
         // 订阅任务进度频道
-        $taskId = $message['taskId'];
+        $channel = ($message['type'] ?? '') === 'export' ? "export:progress:{$message['taskId']}" 
+        : "excel:progress:{$message['taskId']}";
         try {
-            $this->redis->subscribe(["excel:progress:$taskId"], function($redis, $channel, $msg) use ($connection) {
+            $this->redis->subscribe([$channel], function($redis, $channel, $msg) use ($connection) {
                 $connection->send($msg);
             });
         } catch (\Throwable $e) {

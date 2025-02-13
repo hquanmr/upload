@@ -14,12 +14,12 @@ class ExcelProcessor
     private $databaseSaver;
     private  $excelConfig;
 
-    public function __construct($taskId)
+    public function __construct($taskId)  
     {
         $this->taskId = $taskId;
         $this->connectRedis();
         $this->excelConfig = require APP_ROOT.'/src/Config/excel.php';
-        $this->databaseSaver = new DatabaseSaver();
+        $this->databaseSaver = new DatabaseSaver($taskId);
     }
 
     public function handle($filePath)
