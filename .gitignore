@@ -6,3 +6,4 @@
 
 # 忽略某个目录
 vendor/
+compose.lock
