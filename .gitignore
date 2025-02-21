@@ -6,4 +6,5 @@
 
 # 忽略某个目录
 vendor/
+uploads/
 compose.lock
