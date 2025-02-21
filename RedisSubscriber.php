@@ -4,7 +4,7 @@ require __DIR__ . '/vendor/autoload.php';
 define('APP_ROOT', __DIR__.'/');
 
 
-use Upload\Services\QueueWorker;
+use Upload\Services\RedisSubscriber;
 use think\facade\Db;
 use think\facade\Log;
 // 加载数据库配置
@@ -14,8 +14,9 @@ $dbConfig = require 'src/Config/database.php';
 
 Log::init($logConfig);
 Db::setConfig($dbConfig);
+// 启动 Channel 服务
 
-$queue = new QueueWorker();
-$queue->count = 4;
+$queue = new RedisSubscriber();
+$queue->count = 1;
 
 Workerman\Worker::runAll();

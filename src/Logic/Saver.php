@@ -5,22 +5,31 @@ namespace Upload\Logic;
 use  think\facade\Db;
 use Redis;
 
-class DatabaseSaver extends Base
+class Saver extends Base
 {
-  
+    const PENDING = 'pending';
+    const PROCESSING = 'processing';
+    const COMPLETED = 'completed';
+    const FAILED = 'failed';
+
     public function saveToDB($rowData, $extData)
     {
         $time =     time();
-        $user_id =  $extData['user_id'];
+        $userId =  $extData['userId'];
+        $goodsId =  $extData['goodsId'];
+
+
         try {
             $map =  $rowData;
             $rowData['create_time'] = $time;
+            $goods_item = array_merge($rowData, ['user_id' => $userId, 'goods_id' => $goodsId]);
 
-            Db::name('goods_item')->where($map)->find();
-            unset($map['goods_id']);
+            sleep(1);
             if (Db::name('goods_item')->where($map)->find()) {
+                Db::name('goods_item')->where($map)->update($goods_item);
 
-                $this->redis->lpush($this->taskId, json_encode(
+
+                $this->redis->lpush('excel:error:'.$this->taskId, json_encode(
                     [
                         'rowData' => $rowData,
                         'status' => 'failed',
@@ -31,7 +40,7 @@ class DatabaseSaver extends Base
                 return false;
             } else {
 
-                Db::name('goods_item')->data(array_merge($rowData, ['user_id' => $user_id]))->insert();
+                Db::name('goods_item')->data($goods_item)->insert();
                 return true;
             }
         } catch (\Throwable $e) {
@@ -40,5 +49,9 @@ class DatabaseSaver extends Base
         }
     }
 
-
+    public function event($event)
+    {
+        Db::name('upload_records')->where(['task_id' => $this->taskId])->update(['status' => $event]);
+    }
+    public function updateToDb($rowData, $extData) {}
 }

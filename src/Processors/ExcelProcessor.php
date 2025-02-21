@@ -3,8 +3,8 @@
 namespace Upload\Processors;
 
 
-use Redis;
-use Upload\Logic\DatabaseSaver;
+
+use Upload\Logic\Saver;
 use Upload\Helper\Excel;
 
 class ExcelProcessor
@@ -13,16 +13,19 @@ class ExcelProcessor
     private $redis;
     private $databaseSaver;
     private  $excelConfig;
-
-    public function __construct($taskId)  
+    private $currentRow;
+    public function __construct($taskId)
     {
         $this->taskId = $taskId;
-        $this->connectRedis();
-        $this->excelConfig = require APP_ROOT.'/src/Config/excel.php';
-        $this->databaseSaver = new DatabaseSaver($taskId);
+        $this->redis = get_redis_instance();
+
+
+
+        $this->excelConfig = require APP_ROOT . '/src/Config/excel.php';
+        $this->databaseSaver = new Saver($taskId);
     }
 
-    public function handle($filePath)
+    public function handle($filePath, $extData)
     {
         try {
 
@@ -30,24 +33,38 @@ class ExcelProcessor
 
             $totalRows = count($excelData);
 
-            $this->updateProgress(0, $totalRows);
+            $this->databaseSaver->event(Saver::PROCESSING); // 发布进度更新事件
             $goodsItemArr = Excel::formattingCells($excelData,  $this->excelConfig);
 
             $validRows = 0;
             $failRows = 0;
+       
+       
+            // 恢复上次处理进度
+            $this->currentRow = (int)$this->redis->hGet("tasks:{$this->taskId}", 'currentRow') ?: 0;
+         
             foreach ($goodsItemArr as $row => &$rowData) {
-                if ($this->databaseSaver->saveToDB($rowData,['user_id'=>1])) {
-                    $validRows++;
+                if ($row <= $this->currentRow){
+                               continue;
                 } else {
-                    $failRows++;
-                }
+                    if ($this->databaseSaver->saveToDB($rowData, $extData)) {
+                        $validRows++;
+                    } else {
+                        $failRows++;
+                    }
+                    $this->updateProgress($row, $totalRows);
 
-                $this->updateProgress($row, $totalRows);
+                }
+            
+          
+              
             }
 
-            $this->finalizeProgress($validRows,$failRows);
+            $this->finalizeProgress($validRows, $failRows);
+            $this->databaseSaver->event(Saver::COMPLETED); // 发布进度更新事件
         } catch (\Exception $e) {
             $this->notifyError($e->getMessage());
+            $this->databaseSaver->event(Saver::FAILED); // 发布进度更新事件
         } finally {
             @unlink($filePath);
         }
@@ -55,7 +72,17 @@ class ExcelProcessor
 
     private function updateProgress($current, $total)
     {
+
+ 
+
         $progress = round(($current / $total) * 100, 2);
+        // 保存当前进度到Redis
+        $this->redis->hMSet("tasks:{$this->taskId}", [
+            'progress' => $progress,
+            'currentRow' => $current,
+            'status' => 'processing',
+            'updatedAt' => time()
+        ]);
 
         $this->redis->publish("excel:progress:{$this->taskId}", json_encode([
             'taskId' => $this->taskId,
@@ -65,8 +92,8 @@ class ExcelProcessor
             'status' => 'processing'
         ]));
     }
-
-    private function finalizeProgress($validRows,$failRows)
+    // 在ExcelProcessor中标记任务完成
+    private function finalizeProgress($validRows, $failRows)
     {
         $this->redis->publish("excel:progress:{$this->taskId}", json_encode([
             'taskId' => $this->taskId,
@@ -74,6 +101,11 @@ class ExcelProcessor
             'validRows' => $validRows,
             'errorCount' => $failRows
         ]));
+        $this->redis->hSet("tasks:{$this->taskId}", 'status', 'completed');
+        $this->redis->zRem('processing_tasks', $this->taskId);
+
+        
+        $this->redis->zAdd('completed_tasks', time(), $this->taskId);
     }
 
     private function notifyError($message)
@@ -83,15 +115,5 @@ class ExcelProcessor
             'status' => 'failed',
             'error' => $message
         ]));
-    }
-
-
-
- 
-
-    private function connectRedis()
-    {
-        $this->redis = new Redis();
-        $this->redis->connect('127.0.0.1', 6379);
     }
 }

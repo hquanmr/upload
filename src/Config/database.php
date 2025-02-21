@@ -21,6 +21,8 @@ return [
             'charset'     => 'utf8',
             // 数据库表前缀
             'prefix'      => 'hhyp_',
+            'auto_timestamp' => true,
+            'auto_timestamp' => 'int',
         ],
     ],
 ];

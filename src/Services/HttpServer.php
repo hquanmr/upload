@@ -7,11 +7,19 @@ use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
 use Workerman\Connection\TcpConnection;
 use Workerman\RedisQueue\Client;
+use Upload\Controller\UploadController;
+use Upload\Controller\ExportController;
+use Upload\Controller\RecordsController;
+use Upload\Controller\DownloadController;
 
 class HttpServer extends Worker
 {
-
-    public  $saveDir;
+    protected $controllers = [
+        '/export' => [ExportController::class, 'export'],
+        '/download' => [DownloadController::class, 'download'],
+        '/records' => [RecordsController::class, 'list'],
+        '/upload' => [UploadController::class, 'upload']
+    ];
 
     public function __construct($socket)
     {
@@ -21,107 +29,43 @@ class HttpServer extends Worker
 
     public function onRequest(TcpConnection $connection, Request $request)
     {
-        // 处理文件上传
-        if ($request->method() !== 'POST') {
-            throw new \Exception('Method Not Allowed', 405);
+        try {
+            // if ($request->method() !== 'POST') {
+            //     throw new \Exception('Method Not Allowed', 405);
+            // }
+
+            // 验证和清理请求参数
+            $path = $this->sanitizePath($request->path());
+
+            // 获取控制器和方法
+            list($controllerClass, $methodName) = $this->getControllerAndMethod($path);
+
+            // 创建控制器实例并调用方法
+            $instance = new $controllerClass( $request);
+            list($code, $msg,$data)  = $instance->$methodName();
+
+          
+            send_json($connection, $code , $msg,$data);
+        } catch (\Exception $e) {
+            send_json($connection, $e->getCode() ?: 500, $e->getMessage());
+            $connection->close();
         }
-        // 添加导出路由
-        if ($request->path() === '/export') {
-            $taskId = uniqid();
-            $exportData = json_decode($request->rawBody(), true);
-
-            (new Client('redis://127.0.0.1:6379'))->send('export_tasks', [
-                'taskId' => $taskId,
-                'data' => $exportData
-            ]);
-        } elseif (strpos($request->path(), '/download/') === 0) {  // 添加下载路由
-
-            $filename = basename($request->path());
-            $filePath = __DIR__ . '/../../exports/' . $filename;
-
-            if (file_exists($filePath)) {
-                $connection->header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                $connection->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
-                return $connection->send(file_get_contents($filePath));
-            }
-
-            return $this->sendJson($connection, 404, 'File not found');
-        } else {
-            $file = $request->file('excel');
-
-            if (!$file) {
-                throw new \Exception('No file uploaded', 400);
-            }
-
-            $this->validateFile($file);
-
-            // 生成唯一任务ID
-            $taskId = uniqid();
-
-            $savePath = $this->saveUploadedFile($file, $taskId);
-            if (!$savePath) {
-                return $this->sendJson($connection, 500, 'File save failed');
-            }
-
-            // 推送任务到Redis队列
-            (new Client('redis://127.0.0.1:6379'))->send('excel_tasks', [
-                'taskId' => $taskId,
-                'filePath' => $savePath
-            ]);
-        }
-
-
-
-        $this->sendJson($connection, 200, ' success', ['taskId' => $taskId]);
     }
 
-    private function sendJson($conn, $code, $msg, $data = [])
+    private function sanitizePath($path)
     {
-        // 设置响应头和响应体
-        $httpResponse = new Response(200, [
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Methods' => 'POST'
-        ], json_encode([
-            'code' => $code,
-            'msg' => $msg,
-            'data' => $data
-        ]));
-
-        $conn->send($httpResponse);
+        // 清理路径，防止注入攻击
+        return preg_replace('/[^a-zA-Z0-9\/\-_]/', '', $path);
     }
 
-    private function saveUploadedFile($file, $taskId)
+    private function getControllerAndMethod($path)
     {
-        $saveDir = $this->saveDir;
-
-        if (!is_dir($saveDir)) {
-            if (!mkdir($saveDir, 0777, true) && !is_dir($saveDir)) {
-                throw new \Exception('Failed to create directory', 500);
+        foreach ($this->controllers as $route => $handler) {
+            if (strpos($path, $route) === 0) {
+                return $handler;
             }
         }
-
-
-
-
-        $safeFileName = $this->generateSafeFileName($taskId, pathinfo($file['name'], PATHINFO_EXTENSION));
-        $savePath = $saveDir  . $safeFileName;
-
-        return rename($file['tmp_name'], $savePath) ? $savePath : null;
-    }
-
-    function generateSafeFileName($taskId, $extension)
-    {
-        return sprintf('%s.%s', $taskId, strtolower($extension));
-    }
-
-    function validateFile($file, $maxSize = 10485760, $allowedTypes = ['xlsx', 'xls'])
-    {
-        if ($file['size'] > $maxSize) {
-            throw new \Exception('File too large');
-        }
-        $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        if (!in_array(strtolower($fileExtension), $allowedTypes)) {
-            throw new \Exception('Invalid file type');
-        }
+        throw new \Exception('Not Found', 404);
     }
 }
+
