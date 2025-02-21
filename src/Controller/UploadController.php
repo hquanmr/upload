@@ -10,7 +10,7 @@ use Workerman\Protocols\Http\Request;
 class UploadController extends BaseController
 {
 
-    private $saveDir = APP_ROOT . 'uploads' . DIRECTORY_SEPARATOR;
+    private $saveDir = APP_ROOT . 'public'.DIRECTORY_SEPARATOR.'uploads' . DIRECTORY_SEPARATOR;
     private $redisClient; // 新增 Redis 客户端缓存
 
     public function __construct(Request $request)
