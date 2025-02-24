@@ -15,8 +15,7 @@ use Upload\Controller\DownloadController;
 class HttpServer extends Worker
 {
     protected $controllers = [
-        '/export' => [ExportController::class, 'export'],
-        '/download' => [DownloadController::class, 'download'],
+
         '/records' => [RecordsController::class, 'list'],
         '/upload' => [UploadController::class, 'upload']
     ];
