@@ -7,4 +7,4 @@
 # 忽略某个目录
 vendor/
 public/uploads/
-compose.lock
+composer.lock

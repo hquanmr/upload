@@ -3,31 +3,41 @@ namespace Upload\Services;
 
 use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
-use Channel\Client as ChannelClient;
+use React\EventLoop\Factory;
+use Clue\React\Redis\Factory as RedisFactory;
 
 class WsServer extends Worker
 {
     protected $taskConnections = []; // 存储任务ID与连接的映射
+    protected $redisClient;
+    protected $loop;
 
     public function __construct($socket)
     {
         parent::__construct($socket);
-        $this->onWorkerStart = [$this, 'initChannel'];
+
         $this->onMessage = [$this, 'onWsMessage'];
-        $this->onClose = [$this, 'onWsClose'];
+        $this->onWorkerStart = [$this, 'onWorkerStart'];
     }
 
-    public function initChannel()
+    public function onWorkerStart()
     {
-        // 初始化 Channel 客户端
-        ChannelClient::connect('127.0.0.1', 2206);
+        // 创建 ReactPHP 事件循环
+        $this->loop = Factory::create();
 
-        // 订阅任务进度频道
-        ChannelClient::on('task.progress', function($data) {
-            if (isset($this->taskConnections[$data['taskId']])) {
-                $this->taskConnections[$data['taskId']]->send(json_encode($data));
-            }
+        // 创建 Redis 客户端
+        $redisFactory = new RedisFactory($this->loop);
+        $this->redisClient = $redisFactory->createClient('tcp://127.0.0.1:6379');
+
+        // 订阅 Redis 频道
+        $this->redisClient->psubscribe(['excel:progress.*'])->then(function ($redis) {
+            $redis->on('message', function ($pattern, $channel, $message) {
+                $this->handleRedisMessage($channel, $message);
+            });
         });
+
+        // 运行事件循环
+        $this->loop->run();
     }
 
     public function onWsMessage(TcpConnection $connection, $data)
@@ -37,21 +47,20 @@ class WsServer extends Worker
             return $connection->send(json_encode(['error' => 'Invalid message format']));
         }
 
-        // 将任务ID与连接关联
+        // 存储连接和任务ID的映射
         $this->taskConnections[$message['taskId']] = $connection;
-
-        $connection->send(json_encode([
-            'type' => 'subscribed',
-            'taskId' => $message['taskId']
-        ]));
     }
 
-    public function onWsClose(TcpConnection $connection)
+    protected function handleRedisMessage($channel, $message)
     {
-        // 清理断开的连接
-        $taskId = array_search($connection, $this->taskConnections);
-        if ($taskId !== false) {
-            unset($this->taskConnections[$taskId]);
+        // 解析频道名称以获取任务ID
+        preg_match('/excel:progress\.(\d+)/', $channel, $matches);
+        if (isset($matches[1])) {
+            $taskId = $matches[1];
+            if (isset($this->taskConnections[$taskId])) {
+                // 推送消息到相应的 WebSocket 连接
+                $this->taskConnections[$taskId]->send($message);
+            }
         }
     }
 }
