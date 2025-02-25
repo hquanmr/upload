@@ -1,8 +1,8 @@
 <?php
 
-namespace Upload\Logic;
+namespace Upload\Queue;
 
-use  think\facade\Db;
+use think\facade\Db;
 use Redis;
 
 class Saver extends Base
@@ -14,13 +14,12 @@ class Saver extends Base
 
     public function saveToDB($rowData, $extData)
     {
-        $time =     time();
-        $userId =  $extData['userId'];
-        $goodsId =  $extData['goodsId'];
-
+        $time = time();
+        $userId = $extData['userId'];
+        $goodsId = $extData['goodsId'];
 
         try {
-            $map =  $rowData;
+            $map = $rowData;
             $rowData['create_time'] = $time;
             $goods_item = array_merge($rowData, ['user_id' => $userId, 'goods_id' => $goodsId]);
 
@@ -28,8 +27,7 @@ class Saver extends Base
             if (Db::name('goods_item')->where($map)->find()) {
                 Db::name('goods_item')->where($map)->update($goods_item);
 
-
-                $this->redis->lpush('excel:error:'.$this->taskId, json_encode(
+                $this->redis->lpush('excel:error:' . $this->taskId, json_encode(
                     [
                         'rowData' => $rowData,
                         'status' => 'failed',
@@ -39,7 +37,6 @@ class Saver extends Base
                 write_Log('商品已经存在');
                 return false;
             } else {
-
                 Db::name('goods_item')->data($goods_item)->insert();
                 return true;
             }
@@ -48,10 +45,4 @@ class Saver extends Base
             return false;
         }
     }
-
-    public function event($event)
-    {
-        Db::name('upload_records')->where(['task_id' => $this->taskId])->update(['status' => $event]);
-    }
-    public function updateToDb($rowData, $extData) {}
 }

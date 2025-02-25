@@ -1,19 +1,17 @@
 <?php
 
-namespace Upload\Logic;
-
+namespace Upload\Queue;
 
 use Redis;
 
 class Base
 {
     public $taskId;
-    public  $redis;
+    public $redis;
+
     public function __construct($taskId)
     {
         $this->taskId = $taskId;
-        $this->redis =get_redis_instance();;
+        $this->redis = get_redis_instance();
     }
-
- 
 }

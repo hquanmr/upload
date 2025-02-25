@@ -30,11 +30,13 @@ if (!function_exists('send_json')) {
 
 if (!function_exists('get_redis_instance')) {
     function get_redis_instance()
-    {  
-        $redisConfig = require APP_ROOT . '/src/Config/redis.php';
+    {        
+        $redisConfig = $SysConfigs['redis'];
 
         $redis = new \Redis();
         $redis->connect($redisConfig['host'],  $redisConfig['port']); // 根据实际情况配置 Redis 服务器地址和端口
         return $redis;
     }
 }
+
+
