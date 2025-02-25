@@ -29,10 +29,9 @@ class HttpServer extends Worker
     public function onRequest(TcpConnection $connection, Request $request)
     {
         try {
-            // if ($request->method() !== 'POST') {
-            //     throw new \Exception('Method Not Allowed', 405);
-            // }
-
+            // 基础请求验证
+            $this->validateRequest($request);
+            
             // 验证和清理请求参数
             $path = $this->sanitizePath($request->path());
 
@@ -40,15 +39,65 @@ class HttpServer extends Worker
             list($controllerClass, $methodName) = $this->getControllerAndMethod($path);
 
             // 创建控制器实例并调用方法
-            $instance = new $controllerClass( $request);
-            list($code, $msg,$data)  = $instance->$methodName();
+            $instance = new $controllerClass($request);
+            list($code, $msg, $data) = $instance->$methodName();
 
-          
-            send_json($connection, $code , $msg,$data);
+            // 发送响应
+            $this->sendResponse($connection, $code, $msg, $data);
         } catch (\Exception $e) {
-            send_json($connection, $e->getCode() ?: 500, $e->getMessage());
-            $connection->close();
+            $this->handleError($connection, $e);
         }
+    }
+
+    private function validateRequest(Request $request)
+    {
+        // 检查请求方法
+        $allowedMethods = ['GET', 'POST'];
+        if (!in_array($request->method(), $allowedMethods)) {
+            throw new \Exception('Method Not Allowed', 405);
+        }
+
+        // 检查Content-Type
+        if ($request->method() === 'POST') {
+            $contentType = $request->header('content-type');
+            $path = $request->path();
+            
+            // 文件上传接口允许multipart/form-data
+            if (strpos($path, '/upload') === 0) {
+                if (!$contentType || strpos($contentType, 'multipart/form-data') === false) {
+                    throw new \Exception('Invalid Content-Type for file upload', 415);
+                }
+            } else {
+                // 其他POST接口要求application/json
+                if (!$contentType || strpos($contentType, 'application/json') === false) {
+                    throw new \Exception('Invalid Content-Type', 415);
+                }
+            }
+        }
+    }
+
+    private function sendResponse(TcpConnection $connection, $code, $msg, $data = null)
+    {
+        send_json($connection, $code, $msg, $data);
+    }
+
+    private function handleError(TcpConnection $connection, \Exception $e)
+    {
+        $code = $e->getCode() ?: 500;
+        $message = $e->getMessage() ?: 'Internal Server Error';
+        
+        // 记录错误日志
+        write_Log(sprintf(
+            "[%s] %s in %s:%s\nStack trace:\n%s",
+            date('Y-m-d H:i:s'),
+            $e->getMessage(),
+            $e->getFile(),
+            $e->getLine(),
+            $e->getTraceAsString()
+        ));
+
+        send_json($connection, $code, $message);
+        $connection->close();
     }
 
     private function sanitizePath($path)

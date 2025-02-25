@@ -18,47 +18,50 @@ class Excel
 {
     public function outPut($data, $columns, $table = '导出文件')
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-        // 设置第一栏的标题
-        foreach ($columns as $k => $v) {
-            $sheet->setCellValue($k . "1", $v['title']);
-        }
-
-        //第二行起 设置内容
-        $baseRow = 2; //数据从N-1行开始往下输出 这里是避免头信息被覆盖
-
-        foreach ($data as $key => $value) {
-
-            foreach ($columns as $k1 => $v1) {
-                $i = $key + $baseRow;
-                $pValue = $value[$v1['field']] ?? ' ';
-                // if (!is_string($pValue) || !is_numeric($pValue)) {
-                //     $pValue = "";
-                // }
-                $sheet->setCellValue($k1 . $i, $pValue . " ");
+            // 设置第一栏的标题
+            foreach ($columns as $k => $v) {
+                $sheet->setCellValue($k . "1", $v['title']);
             }
-            if (!empty($value['log_str'])) {
-                $num = substr_count($value['log_str'], "\r\n");
-                $sheet->getRowDimension($key + 1)->setRowHeight(40 * $num);
+
+            //第二行起 设置内容
+            $baseRow = 2;
+            $chunkSize = 1000; // 分批处理数据
+            $chunks = array_chunk($data, $chunkSize);
+
+            foreach ($chunks as $chunk) {
+                foreach ($chunk as $key => $value) {
+                    $rowIndex = $key + $baseRow;
+                    foreach ($columns as $k1 => $v1) {
+                        $pValue = isset($value[$v1['field']]) ? trim($value[$v1['field']]) : '';
+                        $sheet->setCellValue($k1 . $rowIndex, $pValue);
+                    }
+                    if (!empty($value['log_str'])) {
+                        $num = substr_count($value['log_str'], "\r\n");
+                        $sheet->getRowDimension($rowIndex)->setRowHeight(40 * $num);
+                    }
+                }
             }
+
+            $writer = new Xlsx($spreadsheet);
+            $filename = $table . '_' . date("Ymd_His") . '.xlsx';
+            $filePath = ROOT_PATH . 'public/excel/' . $filename;
+            
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0777, true);
+            }
+            
+            $writer->save($filePath);
+            return '/excel/' . $filename;
+        } catch (\Exception $e) {
+            throw new \Exception('导出Excel失败：' . $e->getMessage());
+        } finally {
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
         }
-
-
-        // return $data;
-
-        // write_log(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-
-        // Log::info(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-
-        $writer = new Xlsx($spreadsheet);
-
-        $filename = $table . date("Y-m-d", time()) . time() . '.xlsx';
-
-        $writer->save(ROOT_PATH . 'public/excel/' . $filename);
-
-        return '/excel/' . $filename;
     }
 
     public function importExcel($file = '', $sheet = 0, $columnCnt = 0, &$options = [])

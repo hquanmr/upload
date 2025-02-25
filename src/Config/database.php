@@ -23,6 +23,9 @@ return [
             'prefix'      => 'hhyp_',
             'auto_timestamp' => true,
             'auto_timestamp' => 'int',
+            'break_reconnect'   => true,
+            // 断线重连的间隔时间（可选）
+            'break_reconnect_time'  => 150, // 默认0秒
         ],
     ],
 ];
