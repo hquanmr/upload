@@ -14,6 +14,7 @@ class UploadController extends BaseController
     {
         parent::__construct($request);
         $this->fileUploader = new FileUploader($this->redisConfig);
+        $this->redisQueue = new RedisQueue($redisConfig);
     }
 
     public function upload()
@@ -32,22 +33,20 @@ class UploadController extends BaseController
 
             // 验证文件
             $this->fileUploader->validateFile($file);
-
             // 保存文件
             $savePath = $this->fileUploader->saveUploadedFile($file, $taskId);
             if (!$savePath) {
                 throw new \Exception('File save failed', 500);
             }
-
             // 创建任务数据
-            $taskData = $this->fileUploader->createTaskData($taskId, $savePath, $fileName, [
+            $taskData = $this->redisQueue->createTaskData($taskId, $savePath, $fileName, [
                 'userId' => $userId,
                 'goodsId' => $goodsId,
             ]);
 
             // 发送到Redis队列
-            $this->fileUploader->sendToRedisQueue('excel_tasks', $taskData);
-
+  
+            $this->redisQueue->send('excel_tasks', $taskData);
             // 记录上传信息
             UploadRecords::create([
                 'task_id' => $taskId,

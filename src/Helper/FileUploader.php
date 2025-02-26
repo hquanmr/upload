@@ -2,26 +2,22 @@
 
 namespace Upload\Helper;
 
-use Workerman\RedisQueue\Client;
+use Upload\Helper\RedisQueue;
 
 class FileUploader
 {
     private $saveDir;
-    private $redisClient;
-    private $redisConfig;
+    private $redisQueue;
 
     public function __construct($redisConfig, $uploadDir = null)
     {
-        $this->redisConfig = $redisConfig;
         $this->saveDir = $uploadDir ?: APP_ROOT . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+  
         $this->initializeUploader();
     }
 
     private function initializeUploader()
     {
-        // 初始化 Redis 客户端
-        $this->redisClient = new Client('redis://' . $this->redisConfig['host'] . ':' . $this->redisConfig['port']);
-        
         // 创建上传目录
         if (!is_dir($this->saveDir)) {
             mkdir($this->saveDir, 0755, true);
@@ -67,24 +63,5 @@ class FileUploader
         return sprintf('%s.%s', $taskId, strtolower($extension));
     }
 
-    public function sendToRedisQueue($queue, $data)
-    {
-        return $this->redisClient->send($queue, $data);
-    }
-
-    public function createTaskData($taskId, $savePath, $fileName, $extData = [])
-    {
-        return [
-            'taskId' => $taskId,
-            'status' => 'pending',
-            'data' => [
-                'taskId' => $taskId,
-                'filePath' => $savePath,
-                'fileName' => $fileName,
-                'progress' => 0,
-                'createdAt' => time(),
-                'extData' => $extData
-            ]
-        ];
-    }
+ 
 }

@@ -2,6 +2,7 @@
 
 use think\facade\Log;
 use Workerman\Protocols\Http\Response;
+use Upload\Helper\Configs;
 // 测试用
 if (!function_exists('write_Log')) {
     function write_Log($message)
@@ -31,7 +32,7 @@ if (!function_exists('send_json')) {
 if (!function_exists('get_redis_instance')) {
     function get_redis_instance()
     {        
-        $redisConfig = $SysConfigs['redis'];
+        $redisConfig =Configs::get('redis') ;
 
         $redis = new \Redis();
         $redis->connect($redisConfig['host'],  $redisConfig['port']); // 根据实际情况配置 Redis 服务器地址和端口

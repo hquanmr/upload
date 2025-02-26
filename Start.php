@@ -4,38 +4,22 @@ require __DIR__ . '/vendor/autoload.php';
 
 use think\facade\Db;
 use think\facade\Log;
-
+use Upload\Helper\Configs;
 use Upload\Services\QueueWorker;
 use Upload\Services\HttpServer;
 use Upload\Services\WsServer;
 
 define('APP_ROOT', __DIR__ . '/');
 
-/**
- * 批量加载配置文件
- * @param string $configPath 配置文件目录路径
- * @return array 配置信息数组
- */
-function loadConfigs($configPath = 'src/Config/')
-{
-    $configs = [];
-    $configFiles = glob($configPath . '*.php');
 
-    foreach ($configFiles as $file) {
-        $filename = basename($file, '.php');
-        $configs[$filename] = require $file;
-    }
 
-    return $configs;
-}
 
- global $SysConfigs;
-// 加载所有配置文件
- $SysConfigs = loadConfigs();
 
-try {
-    Log::init($configs['log']);
-    Db::setConfig($configs['database']);
+
+try { 
+     Configs::init();    // 初始化配置
+    Log::init( Configs::get('log'));
+    Db::setConfig(Configs::get('database'));
 } catch (Exception $e) {
     echo ("Failed to initialize log or database: " . $e->getMessage());
     exit(1);
