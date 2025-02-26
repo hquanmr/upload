@@ -18,6 +18,8 @@ define('APP_ROOT', __DIR__ . '/');
 
 try { 
      Configs::init();    // 初始化配置
+     $host = Configs::get('redis.host', '127.0.0.1');
+
     Log::init( Configs::get('log'));
     Db::setConfig(Configs::get('database'));
 } catch (Exception $e) {

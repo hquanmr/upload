@@ -7,6 +7,7 @@ use Workerman\RedisQueue\Client as RedisClient;
 use Upload\Processors\ExcelProcessor;
 use Upload\Processors\ExcelExporter;
 use Workerman\Timer;
+use Upload\Helper\Configs;
 
 
 class QueueWorker extends Worker
@@ -119,7 +120,9 @@ class QueueWorker extends Worker
         echo "尝试重新连接 Redis...\n";
         try {
             $this->redis->close();
-            $this->redis->connect('127.0.0.1', 6379);
+            $host = Configs::get('redis.host', '127.0.0.1');
+            $port = Configs::get('redis.port', 6379);
+            $this->redis = connect($host, $port);
             $this->subscribeTasks(); // 重新订阅频道
             echo "Redis 重新连接成功\n";
         } catch (\Exception $e) {
@@ -129,7 +132,9 @@ class QueueWorker extends Worker
 
     private function subscribeTasks()
     { 
-        $syncRedis = new RedisClient('redis://127.0.0.1:6379');
+        $host = Configs::get('redis.host', '127.0.0.1');
+        $port = Configs::get('redis.port', 6379);
+        $syncRedis = new RedisClient("redis://{$host}:{$port}");
         $syncRedis->subscribe('excel_tasks', function ($taskData) {
             try {
 

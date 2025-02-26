@@ -4,8 +4,8 @@
         "phpoffice/phpspreadsheet": "^1.29",
         "workerman/redis-queue": "^1.2",
         "topthink/think-orm": "^2.0",
-        "topthink/think-log": "^2.0",
-        "clue/redis-react": "^2.8"
+        "topthink/think-log": "^2.0"
+  
     },
     "autoload": {
 

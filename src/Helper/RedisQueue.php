@@ -7,17 +7,17 @@ use Workerman\RedisQueue\Client;
 class RedisQueue
 {
     private $client;
-    private $config;
 
-    public function __construct($config)
+    public function __construct()
     {
-        $this->config = $config;
         $this->initializeClient();
     }
 
     private function initializeClient()
     {
-        $this->client = new Client('redis://' . $this->config['host'] . ':' . $this->config['port']);
+        $host = Configs::get('redis.host', '127.0.0.1');
+        $port = Configs::get('redis.port', 6379);
+        $this->client = new Client("redis://{$host}:{$port}");
     }
 
     public function send($queue, $data)
