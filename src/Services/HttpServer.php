@@ -31,7 +31,7 @@ class HttpServer extends Worker
         try {
             // 基础请求验证
             $this->validateRequest($request);
-            
+
             // 验证和清理请求参数
             $path = $this->sanitizePath($request->path());
 
@@ -61,7 +61,7 @@ class HttpServer extends Worker
         if ($request->method() === 'POST') {
             $contentType = $request->header('content-type');
             $path = $request->path();
-            
+
             // 文件上传接口允许multipart/form-data
             if (strpos($path, '/upload') === 0) {
                 if (!$contentType || strpos($contentType, 'multipart/form-data') === false) {
@@ -85,7 +85,7 @@ class HttpServer extends Worker
     {
         $code = $e->getCode() ?: 500;
         $message = $e->getMessage() ?: 'Internal Server Error';
-        
+
         // 记录错误日志
         write_Log(sprintf(
             "[%s] %s in %s:%s\nStack trace:\n%s",
@@ -116,4 +116,3 @@ class HttpServer extends Worker
         throw new \Exception('Not Found', 404);
     }
 }
-

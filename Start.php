@@ -8,19 +8,15 @@ use Upload\Helper\Configs;
 use Upload\Services\QueueWorker;
 use Upload\Services\HttpServer;
 use Upload\Services\WsServer;
+use Upload\Services\CleanupWorker;
 
 define('APP_ROOT', __DIR__ . '/');
 
 
 
-
-
-
-try { 
-     Configs::init();    // 初始化配置
-     $host = Configs::get('redis.host', '127.0.0.1');
-
-    Log::init( Configs::get('log'));
+try {
+    Configs::init();    // 初始化配置
+    Log::init(Configs::get('log'));
     Db::setConfig(Configs::get('database'));
 } catch (Exception $e) {
     echo ("Failed to initialize log or database: " . $e->getMessage());
@@ -39,8 +35,14 @@ $queue = new QueueWorker();
 $queue->count = 4;
 $queue->name = 'QueueWorker';
 
+
+// 启动清理任务进程
+$taskCleanupProcess = new CleanupWorker();
+$taskCleanupProcess->count = 1;
+$queue->name = 'CleanupWorker';
+
 $http = new HttpServer('http://0.0.0.0:2345');
 $http->name = 'HttpWorker';
-$http->count = 4;
+$http->count = 2;
 // 启动各服务
 Workerman\Worker::runAll();
