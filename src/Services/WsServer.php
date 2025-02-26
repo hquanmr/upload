@@ -57,7 +57,7 @@ class WsServer extends Worker
             $host = Configs::get('redis.host', '127.0.0.1');
        
             $port = Configs::get('redis.port', 6379);
-            $this->redis = connect($host, $port);
+            $this->redis->connect($host, $port);
 
             echo "Redis 重新连接成功\n";
         } catch (\Exception $e) {

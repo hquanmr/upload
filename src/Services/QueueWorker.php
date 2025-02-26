@@ -122,7 +122,7 @@ class QueueWorker extends Worker
             $this->redis->close();
             $host = Configs::get('redis.host', '127.0.0.1');
             $port = Configs::get('redis.port', 6379);
-            $this->redis = connect($host, $port);
+            $this->redis->connect($host, $port);
             $this->subscribeTasks(); // 重新订阅频道
             echo "Redis 重新连接成功\n";
         } catch (\Exception $e) {
