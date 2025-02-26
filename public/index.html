@@ -442,7 +442,7 @@
             uploadButton.innerHTML = '<span class="loading"></span> 上传中...';
             clearError();
 
-            fetch('http://localhost:2345/upload', {
+            fetch('http://upload.test/upload', {
                 method: 'POST',
                 body: formData,
             })
@@ -484,7 +484,7 @@
             }
 
             // 创建新的WebSocket连接
-            currentTaskWs = new WebSocket(`ws://localhost:2346`);
+            currentTaskWs = new WebSocket(`ws://upload.test:2346`);
             
             currentTaskWs.onopen = () => {
                 currentTaskWs.send(JSON.stringify({ taskId }));

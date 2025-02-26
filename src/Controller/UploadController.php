@@ -3,18 +3,20 @@
 namespace Upload\Controller;
 
 use Upload\Helper\FileUploader;
+use Upload\Helper\RedisQueue;
 use Upload\Model\UploadRecords;
 use Workerman\Protocols\Http\Request;
 
 class UploadController extends BaseController
 {
     private $fileUploader;
+    private $redisQueue;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->fileUploader = new FileUploader($this->redisConfig);
-        $this->redisQueue = new RedisQueue($redisConfig);
+        $this->fileUploader = new FileUploader();
+        $this->redisQueue = new RedisQueue();
     }
 
     public function upload()

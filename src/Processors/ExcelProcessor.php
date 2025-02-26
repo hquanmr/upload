@@ -4,9 +4,9 @@ namespace Upload\Processors;
 
 
 
-use Uploa\Saver;
+use Upload\Queue\Saver;
 use Upload\Helper\Excel;
-
+use Upload\Helper\Configs;
 class ExcelProcessor
 {
     private $taskId;
@@ -18,7 +18,7 @@ class ExcelProcessor
     {
         $this->taskId = $taskId;
         $this->redis = get_redis_instance();
-        $this->excelConfig = require APP_ROOT . '/src/Config/excel.php';
+        $this->excelConfig = Configs::get('excel');
         $this->databaseSaver = new Saver($taskId);
     }
 

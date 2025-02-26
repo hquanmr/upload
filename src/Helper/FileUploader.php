@@ -9,7 +9,7 @@ class FileUploader
     private $saveDir;
     private $redisQueue;
 
-    public function __construct($redisConfig, $uploadDir = null)
+    public function __construct( $uploadDir = null)
     {
         $this->saveDir = $uploadDir ?: APP_ROOT . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
   

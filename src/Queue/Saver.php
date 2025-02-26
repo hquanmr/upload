@@ -46,6 +46,9 @@ class Saver extends Base
         }
     }
 
-
+    public function event($event)
+    {
+        Db::name('upload_records')->where(['task_id' => $this->taskId])->update(['status' => $event]);
+    }
  
 }
