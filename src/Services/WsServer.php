@@ -22,19 +22,24 @@ class WsServer extends Worker
 
     public function onWorkerStart()
     {
-
-        // 启动心跳定时器
-        $this->startHeartbeat();
-        $redis = $this->redis;
-        // 定时从进度队列中获取消息
-        Timer::add(1, function () use ($redis) {
-            while ($progressData = $redis->rPop('progress_queue')) {
-                $progress = json_decode($progressData, true);
-                if (isset($this->taskConnections[$progress['taskId']])) {
-                    $this->taskConnections[$progress['taskId']]->send(json_encode($progress));
+        try {
+            // 业务逻辑代码
+            // 启动心跳定时器
+            $this->startHeartbeat();
+            $redis = $this->redis;
+            // 定时从进度队列中获取消息
+            Timer::add(1, function () use ($redis) {
+                while ($progressData = $redis->rPop('progress_queue')) {
+                    $progress = json_decode($progressData, true);
+                    if (isset($this->taskConnections[$progress['taskId']])) {
+                        $this->taskConnections[$progress['taskId']]->send(json_encode($progress));
+                    }
                 }
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            write_Log("Redis 连接失败：" . $e->getMessage());
+            $this->reconnectRedis();
+        }
     }
     private function startHeartbeat()
     {
@@ -55,7 +60,7 @@ class WsServer extends Worker
         try {
             $this->redis->close();
             $host = Configs::get('redis.host', '127.0.0.1');
-       
+
             $port = Configs::get('redis.port', 6379);
             $this->redis->connect($host, $port);
 

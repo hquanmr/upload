@@ -39,7 +39,7 @@ $queue->name = 'QueueWorker';
 // 启动清理任务进程
 $taskCleanupProcess = new CleanupWorker();
 $taskCleanupProcess->count = 1;
-$queue->name = 'CleanupWorker';
+$taskCleanupProcess->name = 'CleanupWorker';
 
 $http = new HttpServer('http://0.0.0.0:2345');
 $http->name = 'HttpWorker';
