@@ -25,7 +25,7 @@ try {
 
 $ws_worker = new WsServer('websocket://0.0.0.0:2346');
 $ws_worker->name = 'WebSocketWorker';
-$ws_worker->count = 2;
+$ws_worker->count = 1; //启动多个进程会导致前端连接无法找到对应进程推送，因为每个进程是独立的
 // 允许跨域
 $ws_worker->onWebSocketConnect = function ($connection, $http_header) {
     $connection->send('WebSocket connected');

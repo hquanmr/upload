@@ -29,13 +29,16 @@ class QueueWorker extends Worker
             // 启动心跳定时器
             $this->startHeartbeat();
             // 恢复未完成的任务
+           
             if ($this->acquireLock()) {
+                  var_dump("开始恢复未完成的任务,当前进程ID为: " . $this->workerId );
                 $this->recoverTasks();
                 $this->releaseLock();
+            }else {
+                var_dump("没有抢到锁的进程ID为: " . $this->workerId );
             }
             // 订阅任务 这里会重新进入订阅
             $this->subscribeTasks();
-
         } catch (\Exception $e) {
             // 记录日志并处理异常
             write_Log("Error starting processing: " . $e->getMessage());
@@ -47,6 +50,7 @@ class QueueWorker extends Worker
         try {
             // 获取所有进行中未完成的任务
             $Tasks = $this->redis->zRange('processing_tasks', 0, -1);
+       
             if (empty($Tasks)) {
                 return;
             }
