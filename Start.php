@@ -15,7 +15,7 @@ define('APP_ROOT', __DIR__ . '/');
 
 
 try {
-    Configs::init();    // 初始化配置
+    Configs::init();    // 初始化配置dddd
     Log::init(Configs::get('log'));
     Db::setConfig(Configs::get('database'));
 } catch (Exception $e) {
