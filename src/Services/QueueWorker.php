@@ -19,6 +19,7 @@ class QueueWorker extends Worker
     public function __construct()
     {
         parent::__construct();
+        $this->count = 4;
         $this->redis = get_redis_instance();
         $this->onWorkerStart = [$this, 'startProcessing'];
     }
@@ -29,13 +30,16 @@ class QueueWorker extends Worker
             // 启动心跳定时器
             $this->startHeartbeat();
             // 恢复未完成的任务
-           
+            $pid = posix_getpid();
+            $workerId = $this->id;
+          
             if ($this->acquireLock()) {
-                  var_dump("开始恢复未完成的任务,当前进程ID为: " . $this->workerId );
+                var_dump("开始恢复未完成的任务, 系统进程PID: {$pid}, Worker ID: {$workerId}");
+
                 $this->recoverTasks();
                 $this->releaseLock();
-            }else {
-                var_dump("没有抢到锁的进程ID为: " . $this->workerId );
+            } else {
+                var_dump("没有抢到锁的进程, 系统进程PID: {$pid}, Worker ID: {$workerId}");
             }
             // 订阅任务 这里会重新进入订阅
             $this->subscribeTasks();
@@ -60,6 +64,7 @@ class QueueWorker extends Worker
 
                 if ($taskData['status'] === 'processing') {
                     $task = json_decode($taskData['data'], true);
+                    var_dump("开始处理恢复任务 {$taskId}：" . date('Y-m-d H:i:s'));
                     $this->processTask($taskId)->handle($task['filePath'], $task['extData']);
                 }
             }
@@ -129,6 +134,7 @@ class QueueWorker extends Worker
                 $taskData['data'] = json_encode($taskData['data']);
 
                 $this->redis->hMSet("tasks:{$taskId}", $taskData);
+                var_dump("开始处理订阅任务 {$taskId}：" . date('Y-m-d H:i:s'));
                 $this->processTask($taskId)->handle($task['filePath'], $task['extData']);
             } catch (\Exception $e) {
                 // 记录日志并处理异常

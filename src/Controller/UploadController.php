@@ -54,6 +54,8 @@ class UploadController extends BaseController
                 'task_id' => $taskId,
                 'file_name' => $fileName,
                 'download_url' => $savePath,
+                
+                'created_at' => time(),
             ]);
 
             return [200, 'success', ['taskId' => $taskId]];

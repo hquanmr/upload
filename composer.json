@@ -1,10 +1,10 @@
 {
     "require": {
         "workerman/workerman": "^4.1",
-        "phpoffice/phpspreadsheet": "^1.29",
         "workerman/redis-queue": "^1.2",
         "topthink/think-orm": "^2.0",
-        "topthink/think-log": "^2.0"
+        "topthink/think-log": "^2.0",
+        "phpoffice/phpspreadsheet": "^1.19"
   
     },
     "autoload": {

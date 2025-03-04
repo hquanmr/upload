@@ -2,18 +2,18 @@
 
 namespace Upload\Processors;
 
-
-
 use Upload\Queue\Saver;
 use Upload\Helper\Excel;
 use Upload\Helper\Configs;
+
 class ExcelProcessor
 {
     private $taskId;
     private $redis;
     private $databaseSaver;
-    private  $excelConfig;
+    private $excelConfig;
     private $currentRow;
+
     public function __construct($taskId)
     {
         $this->taskId = $taskId;
@@ -44,14 +44,17 @@ class ExcelProcessor
             unset($excelData); // 释放内存
 
             $validRows = $failRows = 0;
-            $batchSize = 100; // 批量处理大小
+            $batchSize = 10;
             $this->currentRow = (int)$this->redis->hGet("tasks:{$this->taskId}", 'currentRow') ?: 0;
+            $processedRows = 0; // 新增：实际已处理行数计数器
 
-            // 分批处理数据
-            foreach (array_chunk($goodsItemArr, $batchSize) as $batch) {
+            foreach (array_chunk($goodsItemArr, $batchSize) as $batchIndex => $batch) {
+                $batchStartRow = $this->currentRow + ($batchIndex * $batchSize);
+                $batchTotal = count($batch);
+
                 foreach ($batch as $row => $rowData) {
-                    $currentRow = $row + $this->currentRow;
-                    if ($currentRow <= $this->currentRow) {
+                    $currentRow = $batchStartRow + $row;
+                    if ($currentRow < $this->currentRow) {
                         continue;
                     }
 
@@ -61,13 +64,21 @@ class ExcelProcessor
                         } else {
                             $failRows++;
                         }
-                        $this->updateProgress($currentRow, $totalRows, 'processing');
                     } catch (\Exception $e) {
                         $failRows++;
                         // 记录错误但继续处理
                         write_Log("Row {$currentRow} processing error: " . $e->getMessage());
                     }
                 }
+
+                // 整批处理完成后统一更新进度
+                $processedRows += $batchTotal;
+                $this->updateProgress(
+                    $processedRows,
+                    $totalRows,
+                    ($processedRows >= $totalRows) ? 'completed' : 'processing'
+                );
+
                 // 定期释放内存
                 if (function_exists('gc_collect_cycles')) {
                     gc_collect_cycles();
@@ -89,8 +100,8 @@ class ExcelProcessor
             }
         }
     }
-   
 
+    // 修改后的 updateProgress
     private function updateProgress($current, $total, $status = 'processing', $error = null)
     {
         $progress = round(($current / $total) * 100, 2);
@@ -98,10 +109,10 @@ class ExcelProcessor
         $this->redis->hMSet("tasks:{$this->taskId}", [
             'progress' => $progress,
             'currentRow' => $current,
-            'status' => 'processing',
+            'status' => $status, // 改为使用传入的状态
             'updatedAt' => time()
         ]);
-        $this->redis->lPush('progress_queue', json_encode([
+        $this->redis->rPush('progress_queue', json_encode([
             'taskId' => $this->taskId,
             'progress' => $progress,
             'current' => $current,
@@ -111,11 +122,9 @@ class ExcelProcessor
         ]));
     }
 
-
     // 在ExcelProcessor中标记任务完成
     private function finalizeProgress()
     {
-
         $this->redis->hSet("tasks:{$this->taskId}", 'status', 'completed');
         $this->redis->zRem('processing_tasks', $this->taskId);
         $this->redis->zAdd('completed_tasks', time(), $this->taskId);

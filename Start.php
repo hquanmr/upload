@@ -32,7 +32,7 @@ $ws_worker->onWebSocketConnect = function ($connection, $http_header) {
 };
 
 $queue = new QueueWorker();
-$queue->count = 4;
+
 $queue->name = 'QueueWorker';
 
 

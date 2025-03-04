@@ -31,18 +31,12 @@ class FileUploader
         }
 
         $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        
         if (!in_array(strtolower($fileExtension), $allowedTypes)) {
             throw new \Exception('Invalid file type');
         }
 
-        // 验证文件 MIME 类型
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
-
-        if (!in_array($mime, ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])) {
-            throw new \Exception('Invalid file content');
-        }
+ 
     }
 
     public function saveUploadedFile($file, $taskId)

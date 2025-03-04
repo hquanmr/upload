@@ -40,7 +40,7 @@ class WsServer extends Worker
                         if (isset($this->taskConnections[$progress['taskId']]) && $this->taskConnections[$progress['taskId']]->getStatus() === TcpConnection::STATUS_ESTABLISHED) {
                       
                             $connection = $this->taskConnections[$progress['taskId']];
-                            var_dump("ws连接:".$connection);
+                    
                             $connection->send(json_encode($progress));
                         }
                     }
