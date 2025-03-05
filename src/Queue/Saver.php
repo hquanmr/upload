@@ -23,7 +23,7 @@ class Saver extends Base
             $rowData['create_time'] = $time;
             $goods_item = array_merge($rowData, ['user_id' => $userId, 'goods_id' => $goodsId]);
 
-            sleep(1);
+   
             if (Db::name('goods_item')->where($map)->find()) {
                 Db::name('goods_item')->where($map)->update($goods_item);
 
