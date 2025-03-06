@@ -1,12 +1,12 @@
 <?php
 
-namespace Upload\Processors;
+namespace Upload\Logic;
 
-use Upload\Queue\Saver;
+use Upload\Model\Repositories\Saver;
 use Upload\Helper\Excel;
 use Upload\Helper\Configs;
 
-class ExcelProcessor
+class ExcelLogic 
 {
     private $taskId;
     private $redis;

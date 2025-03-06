@@ -1,6 +1,6 @@
 <?php
 
-namespace Upload\Services;
+namespace Upload\Workers;
 
 use Workerman\Worker;
 use Workerman\Timer;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Upload\Queue;
+namespace Upload\Model\Repositories;
 
 use Redis;
 

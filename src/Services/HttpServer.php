@@ -10,14 +10,15 @@ use Workerman\RedisQueue\Client;
 use Upload\Controller\UploadController;
 use Upload\Controller\ExportController;
 use Upload\Controller\RecordsController;
-use Upload\Controller\DownloadController;
+
 
 class HttpServer extends Worker
 {
     protected $controllers = [
 
         '/records' => [RecordsController::class, 'list'],
-        '/upload' => [UploadController::class, 'upload']
+        '/upload' => [UploadController::class, 'upload'],
+        '/export' => [ExportController::class, 'export'],
     ];
 
     public function __construct($socket)

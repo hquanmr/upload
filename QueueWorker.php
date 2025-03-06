@@ -31,14 +31,13 @@ class QueueWorker extends Worker
             $this->startHeartbeat();
             // 恢复未完成的任务
             $pid = posix_getpid();
-            $workerId = $this->id;
-          
+            var_dump("开始恢复未完成的任务,当前系统进程PID为: " . $pid);
             if ($this->acquireLock()) {
                 var_dump("开始恢复未完成的任务, 系统进程PID: {$pid}, Worker ID: {$workerId}");
 
                 $this->recoverTasks();
                 $this->releaseLock();
-            } else {
+                var_dump("没有抢到锁的进程ID为: " . $pid);
                 var_dump("没有抢到锁的进程, 系统进程PID: {$pid}, Worker ID: {$workerId}");
             }
             // 订阅任务 这里会重新进入订阅
@@ -77,18 +76,23 @@ class QueueWorker extends Worker
     private function processTask($taskId)
     {
         try {
-            // 使用 Redis 事务确保操作的原子性
+            // 获取任务元数据
+            $taskMeta = $this->redis->hGetAll("tasks:{$taskId}");
+            $taskType = $taskMeta['type'] ?? 'import'; // 默认为导入
+            
+            // 根据类型选择处理器
+            $processorClass = ($taskType === 'export') 
+                ? \Upload\Processors\ExportProcessor::class 
+                : \Upload\Processors\ExcelProcessor::class;
+    
+            // 更新任务状态
             $this->redis->multi();
             $this->redis->hSet("tasks:{$taskId}", 'status', 'processing');
-
             $this->redis->zAdd('processing_tasks', time(), $taskId);
             $this->redis->exec();
-
-            // 启动任务处理器
-            $processor = new ExcelProcessor($taskId);
-            return $processor;
+    
+            return new $processorClass($taskId);
         } catch (\Exception $e) {
-            // 记录日志并处理异常
             write_Log("Error processing task {$taskId}: " . $e->getMessage());
             throw $e;
         }
