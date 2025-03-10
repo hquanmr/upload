@@ -1,19 +1,35 @@
 <?php
+// ExportLogic.php
 namespace Upload\Logic;
-use Upload\Model\Repositories\Saver;
-class ExportLogic 
-{
-    private $taskId;
 
-    public function __construct(string $taskId)
+use Upload\Model\Repositories\Saver;
+
+class ExportLogic extends BaseLogic
+{
+    public function handle(array $taskData)
     {
-        $this->taskId = $taskId;
+        try {
+            // 初始化进度
+            $this->updateProgress(0, 0, 'processing');
+
+            // 模拟导出逻辑
+            // $exporter = new Saver();
+            // $exporter->export($taskData['filePath'], $this->fetchData($taskData['extData']));
+
+            // 更新进度为完成
+            $this->updateProgress(1, 1, 'completed');
+            $this->finalizeProgress();
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            $this->failProgress($e->getMessage());
+            throw $e;
+        }
     }
 
-    public function handle(string $filePath, array $extData)
+    private function fetchData($extData)
     {
-        // 具体导出逻辑
-        // $exporter = new Saver();
-        // $exporter->export($filePath, $this->fetchData($extData));
+        // 模拟数据获取逻辑
+        return ['data' => $extData];
     }
 }

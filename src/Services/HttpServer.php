@@ -4,9 +4,7 @@ namespace Upload\Services;
 
 use Workerman\Worker;
 use Workerman\Protocols\Http\Request;
-use Workerman\Protocols\Http\Response;
 use Workerman\Connection\TcpConnection;
-use Workerman\RedisQueue\Client;
 use Upload\Controller\UploadController;
 use Upload\Controller\ExportController;
 use Upload\Controller\RecordsController;

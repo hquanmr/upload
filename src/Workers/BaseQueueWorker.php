@@ -55,7 +55,7 @@ abstract class BaseQueueWorker extends Worker
 
             // 使用子类指定的处理器
             $processor = new $this->processorClass($taskId);
-            $processor->handle($taskData['data']['filePath'], $taskData['data']['extData']);
+            $processor->handle($taskData);
 
             $this->redis->hSet("tasks:{$taskId}", 'status', 'completed');
         } catch (\Exception $e) {
