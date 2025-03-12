@@ -114,5 +114,5 @@ abstract class BaseQueueWorker extends Worker
             echo "Redis 重新连接失败：" . $e->getMessage() . "\n";
         }
     }
-    // 其他共用方法（心跳检测、Redis重连等同原逻辑）
+  
 }

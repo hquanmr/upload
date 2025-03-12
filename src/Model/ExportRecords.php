@@ -4,6 +4,6 @@ namespace Upload\Model;
 
 use think\Model;
 
-class UploadRecords extends Model {
+class ExportRecords extends Model {
     
 }

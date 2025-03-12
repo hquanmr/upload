@@ -3,6 +3,7 @@
 namespace Upload\Controller;
 
 use Upload\Helper\RedisQueue;
+use Upload\Model\ExportRecords;
 use Workerman\Protocols\Http\Request;
 
 class ExportController extends BaseController
@@ -26,6 +27,8 @@ class ExportController extends BaseController
 
 
          $taskId = uniqid();
+         $fileName =$userId.'_'.$goodsId.time().'.xlsx';
+         $savePath = APP_ROOT.'public/export/'. $fileName;
          // 创建任务数据
          $taskData = $this->redisQueue->createTaskData($taskId, $savePath, $fileName, [
             'userId' => $userId,
@@ -34,7 +37,8 @@ class ExportController extends BaseController
 
          // 发送到Redis队列
 
-         $this->redisQueue->send('excel_tasks', $taskData);
+         
+         $this->redisQueue->send('export_tasks', $taskData);
          // 记录上传信息
          ExportRecords::create([
             'task_id' => $taskId,
@@ -47,7 +51,7 @@ class ExportController extends BaseController
          return [200, 'success', ['taskId' => $taskId]];
       } catch (\Exception $e) {
          // 记录异常信息
-         write_Log("Error in upload: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+         write_Log("Error in export: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
 
          throw $e; // 异常交给上层统一处理
       }
